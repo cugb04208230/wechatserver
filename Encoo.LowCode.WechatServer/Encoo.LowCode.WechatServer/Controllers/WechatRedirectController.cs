@@ -98,7 +98,7 @@ namespace Encoo.LowCode.WechatServer.Controllers
             {
                 var userinfoResponse = await this._wechatApi.GetAuthUserInfo(suiteAccessToken, code);
                 this.CheckWechatResponse(userinfoResponse);
-                ViewBag.UserInfo = JsonConvert.SerializeObject(userinfoResponse);
+                ViewBag.UserInfo = userinfoResponse;
                 //try
                 //{
                 //    var userDetailInfo = await this._wechatApi.GetAuthUserDetailInfo(suiteAccessToken, new WechatUserDetailInfoRequest { user_ticket = userinfoResponse.user_ticket });
@@ -110,6 +110,15 @@ namespace Encoo.LowCode.WechatServer.Controllers
                 //    ViewBag.UserDetailInfo = e.Message;
                 //}
                 ViewBag.Departments = await this.GetDepartments(userinfoResponse.CorpId);
+
+                var permanent_code = this._dbContext.WechatPermanentCodes.OrderBy(e => e.Id).LastOrDefault();
+                var suite_access_token = await this.GetSuiteAccessToken();
+                var corp_access_token = await this._wechatApi.GetCorpAccessTokenAsync(suite_access_token, new WechatCropAccessTokenRequest { auth_corpid = userinfoResponse.CorpId, permanent_code = permanent_code.PermanentCode });
+                this.CheckWechatResponse(corp_access_token);
+
+                var userInfoResponse = await this._wechatApi.GetDepartmentUserInfo(corp_access_token.AccessToken, 1, 1);
+                this.CheckWechatResponse(userInfoResponse);
+                ViewBag.Users = userInfoResponse.userlist;
 
             }
             catch (Exception e)
@@ -129,11 +138,6 @@ namespace Encoo.LowCode.WechatServer.Controllers
             var departmentResponse = await this._wechatApi.GetAuthDepartmentInfo(corp_access_token.AccessToken);
             this.CheckWechatResponse(departmentResponse);
 
-            foreach (var department in departmentResponse.department)
-            {
-                var userInfoResponse = await this._wechatApi.GetDepartmentUserInfo(corp_access_token.AccessToken, department.id, 1);
-                this.CheckWechatResponse(userInfoResponse);
-            }
 
             return departmentResponse.department;
         }

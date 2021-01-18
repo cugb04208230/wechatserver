@@ -1,22 +1,46 @@
-﻿@{
+﻿@using Encoo.LowCode.WechatServer.Models;
+@using System.Collections.Generic;
+@{
     ViewData["Title"] = "第三方应用授权回调页面";
     Layout = null;
+    var currentUser = ViewBag.UserInfo as WechatAuthUserInfoResponse;
+    var departments = ViewBag.Departments as List<WechatDepartmentInfo>;
+    var users = ViewBag.Users as List<WechatUserInfo>;
 }
 @*<script src="https://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
 <script src="https://open.work.weixin.qq.com/wwopen/js/jwxwork-1.0.0.js"></script>*@
 
 <h1>@ViewData["Title"]</h1>
-<div class="text-center">
+<div class="text-center" style="width:100%">
     <h1 class="display-4">
-        @ViewBag.UserInfo
+        @currentUser.UserId
     </h1>
-
     <h1 class="display-4">
-        @ViewBag.UserDetailInfo
+        @currentUser.CorpId
     </h1>
-
-
     <h1 class="display-4">
-        @ViewBag.Departments
+        ********************************************************
     </h1>
+    @foreach (var department in departments)
+    {
+        <h1 class="display-4">
+            *******************start****************************
+        </h1>
+        <h1 class="display-4">
+            @department.id , @department.name , @department.parentid
+        </h1>
+        var currentUsers = users.Where(e => e.department.Contains(department.id));
+        @foreach (WechatUserInfo item in currentUsers)
+        {
+            <img src="@item.avatar " />
+            <h1 class="display-4">
+                @item.name
+            </h1>
+        }
+        <h1 class="display-4">
+            *******************end****************************
+        </h1>
+    }
+
+
 </div>
