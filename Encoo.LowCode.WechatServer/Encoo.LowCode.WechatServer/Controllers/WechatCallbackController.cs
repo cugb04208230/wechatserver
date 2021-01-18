@@ -78,6 +78,8 @@ namespace Encoo.LowCode.WechatServer.Controllers
                     this._dbContext.SaveChanges();
 
                     var permanentCodeResponse = await this._wechatApi.GetPermanentCodeAsync(await this.GetSuiteAccessToken(), authCodeCreate);
+                    this._dbContext.WechatCaches.Add(new WechatCache() { Value = JsonConvert.SerializeObject(permanentCodeResponse), Key = Guid.NewGuid().ToString() });
+                    this._dbContext.SaveChanges();
                     this.CheckWechatResponse(permanentCodeResponse);
 
                     this._dbContext.WechatPermanentCodes.Add(new WechatPermanentCode { CorpId = permanentCodeResponse.AuthCorpInfo.Corpid, SuiteId = Consts.SuiteId, PermanentCode = permanentCodeResponse.PermanentCode });
