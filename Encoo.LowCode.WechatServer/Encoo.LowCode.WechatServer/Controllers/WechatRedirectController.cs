@@ -58,7 +58,7 @@ namespace Encoo.LowCode.WechatServer.Controllers
             var suiteAccessTokenResponse = await this._wechatApi.GetSuiteAccessTokenAsync(new WechatSuiteAccessTokenRequest { suite_id = Consts.SuiteId, suite_secret = Consts.SuiteSecret, suite_ticket = suiteTicket.Value });
             this.CheckWechatResponse(suiteAccessTokenResponse);
 
-            var permanentCodeResponse = await this._wechatApi.GetPermanentCodeAsync(suiteAccessTokenResponse.AccessToken, new WechatPermanentCodeRequest { auth_code =auth_code});
+            var permanentCodeResponse = await this._wechatApi.GetPermanentCodeAsync(suiteAccessTokenResponse.AccessToken, new WechatPermanentCodeRequest { auth_code = auth_code });
             this.CheckWechatResponse(permanentCodeResponse);
 
             this._dbContext.WechatPermanentCodes.Add(new WechatPermanentCode { CorpId = permanentCodeResponse.AuthCorpInfo.Corpid, SuiteId = Consts.SuiteId, PermanentCode = permanentCodeResponse.PermanentCode });
@@ -70,7 +70,7 @@ namespace Encoo.LowCode.WechatServer.Controllers
         {
             var redirectCallBackUrl = "https://consoletest.bottime.com/wechatserver/WechatRedirect/WebLoginCallback";
             redirectCallBackUrl = System.Web.HttpUtility.UrlEncode(redirectCallBackUrl, System.Text.Encoding.UTF8);
-            var url = string.Format(Consts.WebOauth2Url, Consts.CorpId, redirectCallBackUrl);
+            var url = string.Format(Consts.WebOauth2Url, Consts.CorpId, Consts.SuiteId, redirectCallBackUrl);
             return Redirect(url);
         }
 
@@ -79,7 +79,7 @@ namespace Encoo.LowCode.WechatServer.Controllers
             var suiteAccessToken = await this.GetSuiteAccessToken();
             var userinfoResponse = await this._wechatApi.GetAuthUserInfo(suiteAccessToken, code);
             this.CheckWechatResponse(userinfoResponse);
-            return Ok();
+            return Ok($"{code},{suiteAccessToken},{JsonConvert.SerializeObject(userinfoResponse)}");
         }
 
         public async Task<IActionResult> AppLogin()
