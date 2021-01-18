@@ -61,7 +61,7 @@ namespace Encoo.LowCode.WechatServer.Services
         /// <param name="suite_access_token"></param>
         /// <param name="auth_code">临时授权码</param>
         /// <returns></returns>
-        [Get("/cgi-bin/service/get_permanent_code?suite_access_token={suite_access_token}")]
+        [Post("/cgi-bin/service/get_permanent_code?suite_access_token={suite_access_token}")]
         Task<WechatPermanentCodeResponse> GetPermanentCodeAsync(string suite_access_token, [Body] WechatPermanentCodeRequest body);
 
 
