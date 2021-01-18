@@ -18,7 +18,7 @@ namespace Encoo.LowCode.WechatServer.Models
 
         public string name_en { set; get; }
 
-        public int parent_id { set; get; }
+        public int parentid { set; get; }
 
         public int order { set; get; }
     }

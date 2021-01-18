@@ -129,6 +129,12 @@ namespace Encoo.LowCode.WechatServer.Controllers
             var departmentResponse = await this._wechatApi.GetAuthDepartmentInfo(corp_access_token.AccessToken);
             this.CheckWechatResponse(departmentResponse);
 
+            foreach (var department in departmentResponse.department)
+            {
+                var userInfoResponse = await this._wechatApi.GetDepartmentUserInfo(corp_access_token.AccessToken, department.id, 1);
+                this.CheckWechatResponse(userInfoResponse);
+            }
+
             return departmentResponse.department;
         }
 
