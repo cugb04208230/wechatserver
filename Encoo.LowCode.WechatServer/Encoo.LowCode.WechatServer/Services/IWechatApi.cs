@@ -62,7 +62,7 @@ namespace Encoo.LowCode.WechatServer.Services
         /// <param name="auth_code">临时授权码</param>
         /// <returns></returns>
         [Get("/cgi-bin/service/get_permanent_code?suite_access_token={suite_access_token}")]
-        Task<WechatPermanentCodeResponse> GetPermanentCodeAsync(string suite_access_token, [Body] string auth_code);
+        Task<WechatPermanentCodeResponse> GetPermanentCodeAsync(string suite_access_token, [Body] WechatPermanentCodeRequest body);
 
 
         /// <summary>

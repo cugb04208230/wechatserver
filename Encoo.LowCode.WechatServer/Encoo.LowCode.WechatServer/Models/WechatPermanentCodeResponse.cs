@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Encoo.LowCode.WechatServer.Models
 {
+    public class WechatPermanentCodeRequest
+    {
+        public string auth_code { set; get; }
+    }
 
     public class WechatPermanentCodeResponse : WechatAuthCorpInfoResponse
     {
