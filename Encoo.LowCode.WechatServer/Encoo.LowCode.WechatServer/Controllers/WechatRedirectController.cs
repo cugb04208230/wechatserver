@@ -123,7 +123,7 @@ namespace Encoo.LowCode.WechatServer.Controllers
         {
             var permanent_code = this._dbContext.WechatCaches.FirstOrDefault(e => e.Key == Consts.CacheKeyAuthCode);
             var suite_access_token = await this.GetSuiteAccessToken();
-            var corp_access_token = this._wechatApi.GetCorpAccessTokenAsync(suite_access_token,new WechatCropAccessTokenRequest { auth_corpid=corpid,permanent_code=})
+            var corp_access_token = this._wechatApi.GetCorpAccessTokenAsync(suite_access_token, new WechatCropAccessTokenRequest { auth_corpid = corpid, permanent_code = permanent_code.Value });
         }
 
         private void CheckWechatResponse(WechatBasicResponse wechatBasicResponse)
