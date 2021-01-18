@@ -70,7 +70,7 @@ namespace Encoo.LowCode.WechatServer.Controllers
         {
             var redirectCallBackUrl = "https://consoletest.bottime.com/wechatserver/WechatRedirect/WebLoginCallback";
             redirectCallBackUrl = System.Web.HttpUtility.UrlEncode(redirectCallBackUrl, System.Text.Encoding.UTF8);
-            var url = string.Format(Consts.WebOauth2Url, Consts.CorpId, Consts.SuiteId, redirectCallBackUrl);
+            var url = string.Format(Consts.WebOauth2Url, Consts.CorpId, redirectCallBackUrl, Consts.SuiteId);
             return Redirect(url);
         }
 
