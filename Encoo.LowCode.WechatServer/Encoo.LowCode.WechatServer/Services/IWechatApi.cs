@@ -80,5 +80,10 @@ namespace Encoo.LowCode.WechatServer.Services
 
         [Get("/cgi-bin/service/getuserdetail3rd?suite_access_token={suite_access_token}")]
         Task<WechatUserDetailInfoResponse> GetAuthUserDetailInfo(string suite_access_token,[Body] WechatUserDetailInfoRequest body);
+
+        [Get("/cgi-bin/department/list?access_token={access_token}")]
+        Task<WechatDepartmentInfoResponse> GetAuthDepartmentInfo(string access_token);
+
+        //Task<WechatUserInfoResponse>
     }
 }

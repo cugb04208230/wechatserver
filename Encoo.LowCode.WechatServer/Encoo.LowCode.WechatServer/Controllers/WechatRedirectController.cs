@@ -4,6 +4,7 @@ using Encoo.LowCode.WechatServer.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -108,7 +109,7 @@ namespace Encoo.LowCode.WechatServer.Controllers
                 //{
                 //    ViewBag.UserDetailInfo = e.Message;
                 //}
-
+                ViewBag.Departments = this.GetDepartments(userinfoResponse.CorpId);
 
             }
             catch (Exception e)
@@ -119,15 +120,21 @@ namespace Encoo.LowCode.WechatServer.Controllers
             return View();
         }
 
-        private async Task GetDepartments(string corpid)
+        private async Task<List<WechatDepartmentInfo>> GetDepartments(string corpid)
         {
-            var permanent_code = this._dbContext.WechatCaches.FirstOrDefault(e => e.Key == Consts.CacheKeyAuthCode);
+            var permanent_code = this._dbContext.WechatPermanentCodes.LastOrDefault();
             var suite_access_token = await this.GetSuiteAccessToken();
-            var corp_access_token = this._wechatApi.GetCorpAccessTokenAsync(suite_access_token, new WechatCropAccessTokenRequest { auth_corpid = corpid, permanent_code = permanent_code.Value });
+            var corp_access_token = await this._wechatApi.GetCorpAccessTokenAsync(suite_access_token, new WechatCropAccessTokenRequest { auth_corpid = corpid, permanent_code = permanent_code.PermanentCode });
+            this.CheckWechatResponse(corp_access_token);
+            var departmentResponse = await this._wechatApi.GetAuthDepartmentInfo(corp_access_token.AccessToken);
+            this.CheckWechatResponse(departmentResponse);
+
+            return departmentResponse.department;
         }
 
         private void CheckWechatResponse(WechatBasicResponse wechatBasicResponse)
         {
+            this._dbContext.WechatCaches.Add(new WechatCache { Key = $"CheckWechatResponse_{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff")}", Value = JsonConvert.SerializeObject(wechatBasicResponse) });
             if (!wechatBasicResponse.IsSuccess)
             {
                 throw new Exception($"{wechatBasicResponse.ErrorCode}:{wechatBasicResponse.ErrorMessage}");
