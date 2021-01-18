@@ -135,6 +135,7 @@ namespace Encoo.LowCode.WechatServer.Controllers
         private void CheckWechatResponse(WechatBasicResponse wechatBasicResponse)
         {
             this._dbContext.WechatCaches.Add(new WechatCache { Key = $"CheckWechatResponse_{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff")}", Value = JsonConvert.SerializeObject(wechatBasicResponse) });
+            this._dbContext.SaveChanges();
             if (!wechatBasicResponse.IsSuccess)
             {
                 throw new Exception($"{wechatBasicResponse.ErrorCode}:{wechatBasicResponse.ErrorMessage}");
