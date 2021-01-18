@@ -18,7 +18,7 @@ namespace Encoo.LowCode.WechatServer.Models
         [JsonProperty("expires_in")]
         public int ExpiresIn { set; get; }
 
-        [JsonProperty("expires_in")]
+        [JsonProperty("auth_user_info")]
         public WechatAuthUserInfo AuthUserInfo { set; get; }
 
         [JsonProperty("register_code_info")]
