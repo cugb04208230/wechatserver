@@ -109,7 +109,7 @@ namespace Encoo.LowCode.WechatServer.Controllers
                 //{
                 //    ViewBag.UserDetailInfo = e.Message;
                 //}
-                ViewBag.Departments = this.GetDepartments(userinfoResponse.CorpId);
+                ViewBag.Departments = await this.GetDepartments(userinfoResponse.CorpId);
 
             }
             catch (Exception e)
