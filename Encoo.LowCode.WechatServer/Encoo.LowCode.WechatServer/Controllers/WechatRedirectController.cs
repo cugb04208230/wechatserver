@@ -109,12 +109,15 @@ namespace Encoo.LowCode.WechatServer.Controllers
                 //{
                 //    ViewBag.UserDetailInfo = e.Message;
                 //}
-                ViewBag.Departments = await this.GetDepartments(userinfoResponse.CorpId);
+
+                var suite_access_token = await this.GetSuiteAccessToken();
 
                 var permanent_code = this._dbContext.WechatPermanentCodes.OrderBy(e => e.Id).LastOrDefault();
-                var suite_access_token = await this.GetSuiteAccessToken();
                 var corp_access_token = await this._wechatApi.GetCorpAccessTokenAsync(suite_access_token, new WechatCropAccessTokenRequest { auth_corpid = userinfoResponse.CorpId, permanent_code = permanent_code.PermanentCode });
                 this.CheckWechatResponse(corp_access_token);
+                var departmentResponse = await this._wechatApi.GetAuthDepartmentInfo(corp_access_token.AccessToken);
+                this.CheckWechatResponse(departmentResponse);
+                ViewBag.Departments = departmentResponse.department;
 
                 var userInfoResponse = await this._wechatApi.GetDepartmentUserInfo(corp_access_token.AccessToken, 1, 1);
                 this.CheckWechatResponse(userInfoResponse);
@@ -129,18 +132,6 @@ namespace Encoo.LowCode.WechatServer.Controllers
             return View();
         }
 
-        private async Task<List<WechatDepartmentInfo>> GetDepartments(string corpid)
-        {
-            var permanent_code = this._dbContext.WechatPermanentCodes.OrderBy(e=>e.Id).LastOrDefault();
-            var suite_access_token = await this.GetSuiteAccessToken();
-            var corp_access_token = await this._wechatApi.GetCorpAccessTokenAsync(suite_access_token, new WechatCropAccessTokenRequest { auth_corpid = corpid, permanent_code = permanent_code.PermanentCode });
-            this.CheckWechatResponse(corp_access_token);
-            var departmentResponse = await this._wechatApi.GetAuthDepartmentInfo(corp_access_token.AccessToken);
-            this.CheckWechatResponse(departmentResponse);
-
-
-            return departmentResponse.department;
-        }
 
         private void CheckWechatResponse(WechatBasicResponse wechatBasicResponse)
         {
