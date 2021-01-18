@@ -122,7 +122,7 @@ namespace Encoo.LowCode.WechatServer.Controllers
 
         private async Task<List<WechatDepartmentInfo>> GetDepartments(string corpid)
         {
-            var permanent_code = this._dbContext.WechatPermanentCodes.LastOrDefault();
+            var permanent_code = this._dbContext.WechatPermanentCodes.OrderBy(e=>e.Id).LastOrDefault();
             var suite_access_token = await this.GetSuiteAccessToken();
             var corp_access_token = await this._wechatApi.GetCorpAccessTokenAsync(suite_access_token, new WechatCropAccessTokenRequest { auth_corpid = corpid, permanent_code = permanent_code.PermanentCode });
             this.CheckWechatResponse(corp_access_token);
