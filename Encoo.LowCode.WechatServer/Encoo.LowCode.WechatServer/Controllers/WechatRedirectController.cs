@@ -14,11 +14,11 @@ namespace Encoo.LowCode.WechatServer.Controllers
     {
 
         private readonly IWechatApi _wechatApi;
-        private readonly WechatServerDataContext _dbContext;
-        public WechatRedirectController(IWechatApi wechatApi, WechatServerDataContext dbContext)
+        private readonly CacheService _cacheService;
+        public WechatRedirectController(CacheService cacheService, IWechatApi wechatApi)
         {
             this._wechatApi = wechatApi;
-            this._dbContext = dbContext;
+            this._cacheService = cacheService;
         }
 
         public async Task<IActionResult> PreAuth()
@@ -37,12 +37,7 @@ namespace Encoo.LowCode.WechatServer.Controllers
 
         private async Task<string> GetSuiteAccessToken()
         {
-            var suiteTicket = this._dbContext.WechatCaches.FirstOrDefault(e => e.Key == Consts.CacheKeySuiteTicket);
-            if (suiteTicket == null)
-            {
-                throw new Exception("suiteTicket is null");
-            }
-            var suiteAccessTokenResponse = await this._wechatApi.GetSuiteAccessTokenAsync(new WechatSuiteAccessTokenRequest { suite_id = Consts.SuiteId, suite_secret = Consts.SuiteSecret, suite_ticket = suiteTicket.Value });
+            var suiteAccessTokenResponse = await this._wechatApi.GetSuiteAccessTokenAsync(new WechatSuiteAccessTokenRequest { suite_id = Consts.SuiteId, suite_secret = Consts.SuiteSecret, suite_ticket = this._cacheService.SuiteTicket });
             this.CheckWechatResponse(suiteAccessTokenResponse);
 
             return suiteAccessTokenResponse.AccessToken;
@@ -50,19 +45,19 @@ namespace Encoo.LowCode.WechatServer.Controllers
 
         public async Task<IActionResult> PreAuthCallback(string auth_code, int expires_in, string state)
         {
-            var suiteTicket = this._dbContext.WechatCaches.FirstOrDefault(e => e.Key == Consts.CacheKeySuiteTicket);
-            if (suiteTicket == null)
-            {
-                throw new Exception("suiteTicket is null");
-            }
-            var suiteAccessTokenResponse = await this._wechatApi.GetSuiteAccessTokenAsync(new WechatSuiteAccessTokenRequest { suite_id = Consts.SuiteId, suite_secret = Consts.SuiteSecret, suite_ticket = suiteTicket.Value });
+            var suiteAccessTokenResponse = await this._wechatApi.GetSuiteAccessTokenAsync(new WechatSuiteAccessTokenRequest { suite_id = Consts.SuiteId, suite_secret = Consts.SuiteSecret, suite_ticket = _cacheService.SuiteTicket });
             this.CheckWechatResponse(suiteAccessTokenResponse);
 
             var permanentCodeResponse = await this._wechatApi.GetPermanentCodeAsync(suiteAccessTokenResponse.AccessToken, new WechatPermanentCodeRequest { auth_code = auth_code });
             this.CheckWechatResponse(permanentCodeResponse);
 
-            this._dbContext.WechatPermanentCodes.Add(new WechatPermanentCode { CorpId = permanentCodeResponse.AuthCorpInfo.Corpid, SuiteId = Consts.SuiteId, PermanentCode = permanentCodeResponse.PermanentCode });
-            this._dbContext.SaveChanges();
+            if (_cacheService.PermanentCodes.ContainsKey(permanentCodeResponse.AuthCorpInfo.Corpid))
+            {
+                _cacheService.PermanentCodes[permanentCodeResponse.AuthCorpInfo.Corpid] = permanentCodeResponse.PermanentCode;
+            }
+            else
+                _cacheService.PermanentCodes.Add(permanentCodeResponse.AuthCorpInfo.Corpid, permanentCodeResponse.PermanentCode);
+
             return View();
         }
 
@@ -93,36 +88,14 @@ namespace Encoo.LowCode.WechatServer.Controllers
         public async Task<IActionResult> AppLoginCallback(string code, string state)
         {
             var suiteAccessToken = await this.GetSuiteAccessToken();
-
             try
             {
                 var userinfoResponse = await this._wechatApi.GetAuthUserInfo(suiteAccessToken, code);
                 this.CheckWechatResponse(userinfoResponse);
                 ViewBag.UserInfo = userinfoResponse;
-                //try
-                //{
-                //    var userDetailInfo = await this._wechatApi.GetAuthUserDetailInfo(suiteAccessToken, new WechatUserDetailInfoRequest { user_ticket = userinfoResponse.user_ticket });
-                //    this.CheckWechatResponse(userDetailInfo);
-                //    ViewBag.UserDetailInfo = JsonConvert.SerializeObject(userDetailInfo);
-                //}
-                //catch (Exception e)
-                //{
-                //    ViewBag.UserDetailInfo = e.Message;
-                //}
-
-                var suite_access_token = await this.GetSuiteAccessToken();
-
-                var permanent_code = this._dbContext.WechatPermanentCodes.OrderBy(e => e.Id).LastOrDefault();
-                var corp_access_token = await this._wechatApi.GetCorpAccessTokenAsync(suite_access_token, new WechatCropAccessTokenRequest { auth_corpid = userinfoResponse.CorpId, permanent_code = permanent_code.PermanentCode });
-                this.CheckWechatResponse(corp_access_token);
-                var departmentResponse = await this._wechatApi.GetAuthDepartmentInfo(corp_access_token.AccessToken);
-                this.CheckWechatResponse(departmentResponse);
-                ViewBag.Departments = departmentResponse.department;
-
-                var userInfoResponse = await this._wechatApi.GetDepartmentUserInfo(corp_access_token.AccessToken, 1, 1);
-                this.CheckWechatResponse(userInfoResponse);
-                ViewBag.Users = userInfoResponse.userlist;
-
+                var key = Guid.NewGuid().ToString();
+                _cacheService.Tickets.Add(key, userinfoResponse);
+                ViewBag.Token = key;
             }
             catch (Exception e)
             {
@@ -132,11 +105,41 @@ namespace Encoo.LowCode.WechatServer.Controllers
             return View();
         }
 
+        public async Task<IActionResult> QrLogin(string callbackurl)
+        {
+            callbackurl = System.Web.HttpUtility.UrlEncode(callbackurl, System.Text.Encoding.UTF8);
+            var url = $"https://consoletest.bottime.com/wechatserver/WechatRedirect/QrLoginCallback?callbackurl={callbackurl}";
+            url = System.Web.HttpUtility.UrlEncode(url, System.Text.Encoding.UTF8);
+            ViewBag.Url = string.Format(Consts.QrLoginUrl, Consts.CorpId, url, "member");
+            return View();
+        }
+
+        public async Task<IActionResult> QrLoginCallback(string callbackurl,string auth_code, string state)
+        {
+            var suiteAccessToken = await _wechatApi.GetProviderAccessTokenAsync(new WechatProviderAccessTokenRequest { });
+                this.CheckWechatResponse(suiteAccessToken);
+                var userinfoResponse = await this._wechatApi.GetLoginAuthUserInfo(suiteAccessToken.AccessToken, new LoginUserRequest { auth_code=auth_code});
+                this.CheckWechatResponse(userinfoResponse);
+                var key = Guid.NewGuid().ToString();
+                _cacheService.Tickets.Add(key, new WechatAuthUserInfoResponse
+                {
+                    UserId = userinfoResponse.user_info.userid,
+                    open_userid = userinfoResponse.user_info.open_userid,
+                    CorpId = userinfoResponse.corp_info.corpid,
+                    user_ticket = userinfoResponse.user_info.name
+                }) ;
+            if (!callbackurl.Contains("?"))
+            {
+                callbackurl = callbackurl + "?";
+            }
+            callbackurl += $"&ticket={key}";
+            ViewBag.Url = callbackurl;
+            return View();
+        }
 
         private void CheckWechatResponse(WechatBasicResponse wechatBasicResponse)
         {
-            this._dbContext.WechatCaches.Add(new WechatCache { Key = $"CheckWechatResponse_{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:fff")}", Value = JsonConvert.SerializeObject(wechatBasicResponse) });
-            this._dbContext.SaveChanges();
+            Console.WriteLine(JsonConvert.SerializeObject(wechatBasicResponse));
             if (!wechatBasicResponse.IsSuccess)
             {
                 throw new Exception($"{wechatBasicResponse.ErrorCode}:{wechatBasicResponse.ErrorMessage}");

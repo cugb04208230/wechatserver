@@ -9,8 +9,8 @@ namespace Encoo.LowCode.WechatServer.Models
 
     public class WechatProviderAccessTokenRequest
     {
-        public string corpid { set; get; }
-        public string provider_secret { set; get; }
+        public string corpid { set; get; } = Consts.CorpId;
+        public string provider_secret { set; get; } = Consts.ProviderSecret;
     }
 
     public class WechatProviderAccessTokenResponse : WechatBasicResponse

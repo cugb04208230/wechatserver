@@ -25,10 +25,12 @@ namespace Encoo.LowCode.WechatServer
         /// <summary>
         /// 第三方应用内打开网页时的Uri string.format(Consts.AppOauth2Url,suiteid,UrlEncode(redirect_url))
         /// </summary>
-        public const string AppOauth2Url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid={0}&redirect_uri={1}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect";
+        public const string AppOauth2Url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid={0}&redirect_uri={1}&response_type=code&scope=snsapi_base&state=STATE#wechat_redirect";
         /// <summary>
         /// 网页应用构建uri string.format(Consts.AppOauth2Url,suiteid,UrlEncode(redirect_url))
         /// </summary>
-        public const string WebOauth2Url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid={0}&redirect_uri={1}&response_type=code&scope=snsapi_userinfo&agentid={2}&state=STATE#wechat_redirect";
+        public const string WebOauth2Url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid={0}&redirect_uri={1}&response_type=code&scope=snsapi_base&agentid={2}&state=STATE#wechat_redirect";
+
+        public const string QrLoginUrl = "https://open.work.weixin.qq.com/wwopen/sso/3rd_qrConnect?appid={0}&redirect_uri={1}&state=encoo_web_login@qr.qywechat&usertype={2}";
     }
 }

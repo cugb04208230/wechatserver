@@ -1,19 +1,19 @@
 ﻿@using Encoo.LowCode.WechatServer.Models;
-@using System.Collections.Generic;
 @{
     ViewData["Title"] = "第三方应用授权回调页面";
     Layout = null;
     var currentUser = ViewBag.UserInfo as WechatAuthUserInfoResponse;
-    var departments = ViewBag.Departments as List<WechatDepartmentInfo>;
-    var users = ViewBag.Users as List<WechatUserInfo>;
+    var token = ViewBag.Token as string;
+    var url = $"https://consoletest.bottime.com/sso.html?access_token={token}";
 }
-<script src="https://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
-<script src="https://open.work.weixin.qq.com/wwopen/js/jwxwork-1.0.0.js"></script>
 
 <h1>@ViewData["Title"]</h1>
 <div class="text-center" style="width:100%">
     <h1 class="display-4">
-        当前用户名：@currentUser.UserId
+        当前供应商唯一Id：@currentUser.open_userid
+    </h1>
+    <h1 class="display-4">
+        当前用户企业内Id：@currentUser.UserId
     </h1>
     <h1 class="display-4">
         当前的企业Id: @currentUser.CorpId
@@ -21,205 +21,7 @@
     <h1 class="display-4">
         ********************************************************
     </h1>
-    @foreach (var department in departments)
-    {
-        <h1 class="display-4">
-            *******************start****************************
-        </h1>
-        <wx-open-data type="userName" openid=""></wx-open-data>
-        <h1 class="display-4">
-            部门Id; @department.id , 部门名称： @department.name , 父部门Id： @department.parentid
-        </h1>
-        var currentUsers = users.Where(e => e.department.Contains(department.id));
-        @foreach (WechatUserInfo item in currentUsers)
-        {
-            <h1 class="display-4">
-                部门成员：@item.name
-            </h1>
-        }
-        <h1 class="display-4">
-            *******************end****************************
-        </h1>
-    }
 
+    <a style="width:100px;height:60px;" href="@url" >回到SSO</a>
 
 </div>
-<script>
-        (async () => {
-            try {
-                console.info('WWOpenData demo start')
-                if (/MicroMessenger/i.test(navigator.userAgent)) {
-                    await config({
-                        beta: true,// 必须这么写，否则wx.invoke调用形式的jsapi会有问题
-                        debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
-                        appId: 'wwe4fe7dec42c79ac6', // 必填，企业微信的corpID
-                        timestamp: , // 必填，生成签名的时间戳
-                        nonceStr: '', // 必填，生成签名的随机串
-                        signature: '',// 必填，签名，见 附录-JS-SDK使用权限签名算法
-                        jsApiList: ['selectEnterpriseContact',
-                            'openUserProfile',
-                            'selectExternalContact',
-                            'getCurExternalContact',
-                            'getCurExternalChat',
-                            'sendChatMessage',
-                            'getContext',
-                            'openEnterpriseChat',
-                            'onMenuShareAppMessage',
-                            'onMenuShareWechat',
-                            'onMenuShareTimeline',
-                            'shareAppMessage',
-                            'shareWechatMessage',
-                            'shareToExternalContact',
-                            'shareToExternalChat',
-                            'onHistoryBack',
-                            'hideOptionMenu',
-                            'showOptionMenu',
-                            'hideMenuItems',
-                            'showMenuItems',
-                            'hideAllNonBaseMenuItem',
-                            'showAllNonBaseMenuItem',
-                            'closeWindow',
-                            'openDefaultBrowser',
-                            'onUserCaptureScreen',
-                            'scanQRCode',
-                            'chooseInvoice',
-                            'enterpriseVerify',
-                            'chooseImage',
-                            'previewImage',
-                            'uploadImage',
-                            'downloadImage',
-                            'getLocalImgData',
-                            'startRecord',
-                            'stopRecord',
-                            'onVoiceRecordEnd',
-                            'playVoice',
-                            'pauseVoice',
-                            'stopVoice',
-                            'onVoicePlayEnd',
-                            'uploadVoice',
-                            'downloadVoice',
-                            'translateVoice',
-                            'previewFile',
-                            'startWifi',
-                            'stopWifi',
-                            'connectWifi',
-                            'getWifiList',
-                            'onGetWifiList',
-                            'onWifiConnected',
-                            'getConnectedWifi',
-                            'openBluetoothAdapter',
-                            'closeBluetoothAdapter',
-                            'getBluetoothAdapterState',
-                            'onBluetoothAdapterStateChange',
-                            'startBluetoothDevicesDiscovery',
-                            'stopBluetoothDevicesDiscovery',
-                            'getBluetoothDevices',
-                            'onBluetoothDeviceFound',
-                            'getConnectedBluetoothDevices',
-                            'createBLEConnection',
-                            'closeBLEConnection',
-                            'onBLEConnectionStateChange',
-                            'getBLEDeviceServices',
-                            'getBLEDeviceCharacteristics',
-                            'readBLECharacteristicValue',
-                            'writeBLECharacteristicValue',
-                            'notifyBLECharacteristicValueChange',
-                            'onBLECharacteristicValueChange',
-                            'startBeaconDiscovery',
-                            'stopBeaconDiscovery',
-                            'getBeacons',
-                            'onBeaconUpdate',
-                            'onBeaconServiceChange',
-                            'setClipboardData',
-                            'getNetworkType',
-                            'onNetworkStatusChange',
-                            'openLocation',
-                            'getLocation',
-                            'startAutoLBS',
-                            'stopAutoLBS',
-                            'onLocationChange'
-                        ] // 必填，需要使用的JS接口列表，凡是要调用的接口都需要传进来
-                    })
-                }
-                await agentConfig({
-                    corpid: '', // 必填，企业微信的corpid，必须与当前登录的企业一致
-                    agentid: '', // 必填，企业微信的应用id （e.g. 1000247）
-                    timestamp: , // 必填，生成签名的时间戳
-                    nonceStr: '', // 必填，生成签名的随机串
-                    signature: '',// 必填，签名，见附录-JS-SDK使用权限签名算法
-                    jsApiList: ['selectExternalContact'], //必填
-                    success: function (res) {
-                        // 回调
-                    },
-                    fail: function (res) {
-                        if (res.errMsg.indexOf('function not exist') > -1) {
-                            alert('版本过低请升级')
-                        }
-                    }
-                })
-                console.info('window.WWOpenData', window.WWOpenData)
-                if (WWOpenData.checkSession) {
-                    WWOpenData.checkSession({
-                        success() {
-                            console.info('open-data 登录态校验成功')
-                        },
-                        fail() {
-                            console.error('open-data 登录态过期')
-                        },
-                    })
-                }
-                if (WWOpenData.on) {
-
-                    WWOpenData.on('update', event => {
-                        const openid = event.detail.element.getAttribute('openid')
-                        console.info('渲染数据发生变更', openid, event.detail.hasData)
-                    })
-
-                    WWOpenData.on('error', () => {
-                        console.error('获取数据失败')
-                    })
-                }
-
-                const container = document.getElementById('container')
-
-                for (const openid of window.openidList) {
-                    const element = document.createElement('ww-open-data')
-                    element.setAttribute('type', 'userName')
-                    element.setAttribute('openid', openid)
-                    container.appendChild(element)
-                }
-
-                WWOpenData.bindAll(document.querySelectorAll('ww-open-data'))
-                console.info('WWOpenData demo end')
-            } catch (error) {
-                console.error('WWOpenData demo error', error)
-            }
-
-            async function config(config) {
-                return new Promise((resolve, reject) => {
-                    console.info('wx.config', config)
-                    wx.config(config)
-                    wx.ready(resolve)
-                    wx.error(reject)
-                }).then(() => {
-                    console.info('wx.ready')
-                }, error => {
-                    console.error('wx.error', error)
-                    throw error
-                })
-            }
-
-            async function agentConfig(config) {
-                return new Promise((success, fail) => {
-                    console.info('wx.agentConfig', config)
-                    wx.agentConfig({ ...config, success, fail })
-                }).then(res => {
-                    console.info('wx.agentConfig success', res)
-                    return res
-                }, error => {
-                    console.error('wx.agentConfig fail', error)
-                    throw error
-                })
-            }
-        })()
-</script>

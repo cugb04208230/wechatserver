@@ -1,11 +1,7 @@
 ﻿using Encoo.LowCode.WechatServer.Metadata;
-using Encoo.LowCode.WechatServer.Models;
 using Encoo.LowCode.WechatServer.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Encoo.LowCode.WechatServer.Controllers
 {
@@ -15,36 +11,40 @@ namespace Encoo.LowCode.WechatServer.Controllers
     {
         private readonly IWechatApi _wechatApi;
         private readonly WechatServerDataContext _dbContext;
-        public WechatController(IWechatApi wechatApi, WechatServerDataContext dbContext)
+        private readonly CacheService _cacheService;
+        public WechatController(IWechatApi wechatApi, WechatServerDataContext dbContext, CacheService cacheService)
         {
             this._wechatApi = wechatApi;
             this._dbContext = dbContext;
             this._dbContext.WechatSessionInfos.Add(new WechatSessionInfo { Corpid = Guid.NewGuid().ToString(), Userid = Guid.NewGuid().ToString(), SessionKey = Guid.NewGuid().ToString() });
+            this._cacheService = cacheService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetSessionAsync(string code)
+        public IActionResult GetCacheValue(string type)
         {
-            var providerAccessToken = await this.GetProviderAccessToken();
-            var code2SessionResponse = await this._wechatApi.GetWechatCode2SessionAsync(providerAccessToken, code);
-            this.CheckWechatResponse(code2SessionResponse);
-
-            return Ok(new { code2SessionResponse.Corpid, code2SessionResponse.Userid, code2SessionResponse.session_key });
-        }
-
-        private async Task<string> GetProviderAccessToken()
-        {
-            var providerAccessTokenResponse = await this._wechatApi.GetProviderAccessTokenAsync(new WechatProviderAccessTokenRequest { corpid = Consts.CorpId, provider_secret = Consts.ProviderSecret });
-            this.CheckWechatResponse(providerAccessTokenResponse);
-            return providerAccessTokenResponse.AccessToken;
-        }
-
-        private void CheckWechatResponse(WechatBasicResponse wechatBasicResponse)
-        {
-            if (!wechatBasicResponse.IsSuccess)
+            switch (type)
             {
-                throw new Exception($"{wechatBasicResponse.ErrorCode}:{wechatBasicResponse.ErrorMessage}");
+                case "SuiteTicket":
+                    return Ok(_cacheService.SuiteTicket);
+                case "PermanentCodes":
+                    return Ok(_cacheService.PermanentCodes);
+                case "Departments":
+                    return Ok(_cacheService.Departments);
+                case "DepartmentUsers":
+                    return Ok(_cacheService.DepartmentUsers);
             }
+            return Ok("Can not find");
+        }
+
+        [HttpGet("ticket")]
+        public IActionResult GetTicket(string ticket)
+        {
+            if (_cacheService.Tickets.ContainsKey(ticket))
+            {
+                return Ok(_cacheService.Tickets[ticket]);
+            }
+            return Ok("Can not find");
         }
     }
 }

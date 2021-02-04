@@ -1,0 +1,11 @@
+﻿@using Encoo.LowCode.WechatServer.Services;
+@{
+    ViewData["Title"] = "扫码跳转页面";
+    Layout = null;
+    var url = ViewBag.Url as string;
+}
+
+<h1>@ViewData["Title"]</h1>
+    <div class="text-center" style="width:100%">
+        <a style="width:100px;height:60px;" href="@url">扫码验证</a>
+    </div>

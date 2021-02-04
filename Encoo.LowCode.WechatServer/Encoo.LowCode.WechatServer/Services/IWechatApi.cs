@@ -11,7 +11,7 @@ namespace Encoo.LowCode.WechatServer.Services
         /// get access_token from wechat 
         /// </summary>
         /// <returns></returns>
-        [Post("/cgi-bin/gettoken")]
+        [Post("/cgi-bin/service/get_provider_token")]
         Task<WechatProviderAccessTokenResponse> GetProviderAccessTokenAsync([Body] WechatProviderAccessTokenRequest body);
 
         /// <summary>
@@ -86,5 +86,35 @@ namespace Encoo.LowCode.WechatServer.Services
 
         [Get("/cgi-bin/user/list?access_token={access_token}&department_id={department_id}&fetch_child={fetch_child}")]
         Task<WechatUserInfoResponse> GetDepartmentUserInfo(string access_token, int department_id, int fetch_child = 1);
+
+
+        [Post("/cgi-bin/service/get_login_info?access_token={access_token}")]
+        Task<LoginUserResponse> GetLoginAuthUserInfo(string access_token, LoginUserRequest body);
+    }
+
+    public class LoginUserRequest
+    {
+        public string auth_code { set; get; }
+    }
+
+    public class LoginUserResponse : WechatBasicResponse
+    {
+        public LoginUserInfo user_info { set; get; }
+        public LoginUserCorpInfo corp_info { set; get; }
+    }
+
+    public class LoginUserInfo
+    {
+
+        public string userid { set; get; }
+
+        public string name { set; get; }
+        public string avatar { set; get; }
+        public string open_userid { set; get; }
+    }
+
+    public class LoginUserCorpInfo
+    {
+        public string corpid { set; get; }
     }
 }

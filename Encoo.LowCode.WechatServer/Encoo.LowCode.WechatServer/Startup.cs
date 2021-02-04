@@ -25,6 +25,7 @@ namespace Encoo.LowCode.WechatServer
             services.AddControllers();
             services.AddControllersWithViews();
             services.AddRefitClient<IWechatApi>().ConfigureHttpClient(c=> { c.BaseAddress = new System.Uri("https://qyapi.weixin.qq.com"); });
+            services.AddSingleton<CacheService>();
             services.AddDbContext<WechatServerDataContext>(optionbuilder =>
             {
                 optionbuilder.UseSqlServer("Data Source=150.158.108.45;Initial Catalog=WechatTest;User ID=sa;password=Cugb0972Ftd;Integrated Security=false;");

@@ -8,8 +8,8 @@ namespace Encoo.LowCode.WechatServer.Models
 {
     public class WechatSuiteAccessTokenRequest
     {
-        public string suite_id { set; get; }
-        public string suite_secret { set; get; }
+        public string suite_id { set; get; } = Consts.SuiteId;
+        public string suite_secret { set; get; } = Consts.SuiteSecret;
         public string suite_ticket { set; get; }
     }
 

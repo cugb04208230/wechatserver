@@ -32,5 +32,7 @@ namespace Encoo.LowCode.WechatServer.Models
         public string qr_code { set;get;}
 
         public int main_department { set; get; }
+
+        public string open_userid { set; get; }
     }
 }
