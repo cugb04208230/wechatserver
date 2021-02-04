@@ -31,6 +31,6 @@ namespace Encoo.LowCode.WechatServer
         /// </summary>
         public const string WebOauth2Url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid={0}&redirect_uri={1}&response_type=code&scope=snsapi_base&agentid={2}&state=STATE#wechat_redirect";
 
-        public const string QrLoginUrl = "https://open.work.weixin.qq.com/wwopen/sso/3rd_qrConnect?appid={0}&redirect_uri={1}&state=encoo_web_login@qr.qywechat&usertype={2}";
+        public const string QrLoginUrl = "https://open.work.weixin.qq.com/wwopen/sso/3rd_qrConnect?appid={0}&redirect_uri={1}&state={2}&usertype={3}";
     }
 }

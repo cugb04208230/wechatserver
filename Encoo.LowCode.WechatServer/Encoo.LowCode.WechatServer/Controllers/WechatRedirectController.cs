@@ -1,11 +1,8 @@
-﻿using Encoo.LowCode.WechatServer.Metadata;
-using Encoo.LowCode.WechatServer.Models;
+﻿using Encoo.LowCode.WechatServer.Models;
 using Encoo.LowCode.WechatServer.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Encoo.LowCode.WechatServer.Controllers
@@ -105,12 +102,12 @@ namespace Encoo.LowCode.WechatServer.Controllers
             return View();
         }
 
-        public async Task<IActionResult> QrLogin(string callbackurl)
+        public async Task<IActionResult> QrLogin(string callbackurl,string state)
         {
             callbackurl = System.Web.HttpUtility.UrlEncode(callbackurl, System.Text.Encoding.UTF8);
             var url = $"https://consoletest.bottime.com/wechatserver/WechatRedirect/QrLoginCallback?callbackurl={callbackurl}";
             url = System.Web.HttpUtility.UrlEncode(url, System.Text.Encoding.UTF8);
-            ViewBag.Url = string.Format(Consts.QrLoginUrl, Consts.CorpId, url, "member");
+            ViewBag.Url = string.Format(Consts.QrLoginUrl, Consts.CorpId, url,state, "member");
             return View();
         }
 
@@ -132,6 +129,7 @@ namespace Encoo.LowCode.WechatServer.Controllers
             {
                 callbackurl = callbackurl + "?";
             }
+            callbackurl += $"&state={state}";
             callbackurl += $"&ticket={key}";
             ViewBag.Url = callbackurl;
             return View();
